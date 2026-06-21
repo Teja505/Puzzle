@@ -62,4 +62,4 @@ To use your own photos instead of URLs:
 5. Under "Build and deployment", set **Source** to "Deploy from a branch".
 6. Pick branch `main` and folder `/ (root)`, then Save.
 7. Wait ~1 minute. Your site will be live at:
-   `https://<your-username>.github.io/<repo-name>/`
+   `https://teja505.github.io/Puzzle/`
