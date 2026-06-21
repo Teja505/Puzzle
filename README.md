@@ -1,9 +1,12 @@
+
+©Copyright teja_addakula
+
 # Solve with Love 💜
 
 A single-page "solve the puzzle to reveal a love message" site — like the one in your video.
 
 ## Files
-- `index.html` — everything (HTML + CSS + JS) in one file. No build step, no backend, no MCP server needed.
+- `index.html` — everything (HTML + CSS + JS) in one file.
 
 ## How to customize
 Open `index.html`, find the `CONFIG` block near the top of the `<script>` tag, and edit:
@@ -60,9 +63,3 @@ To use your own photos instead of URLs:
 6. Pick branch `main` and folder `/ (root)`, then Save.
 7. Wait ~1 minute. Your site will be live at:
    `https://<your-username>.github.io/<repo-name>/`
-
-That's it — no server, no hosting fees, no MCP server required.
-
-## About the "MCP server" request
-
-MCP (Model Context Protocol) servers let AI assistants call tools or read data from external systems — they're for connecting AI models to things like databases, APIs, or apps. A static personalized webpage like this doesn't need one; it's just HTML/CSS/JS that runs entirely in the visitor's browser. If you had something specific in mind for an MCP server (e.g., having an AI assistant generate new puzzle pages on demand), let me know and I can help with that separately.
