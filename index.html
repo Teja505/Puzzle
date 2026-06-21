@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solve with Love</title>
+<style>
+  :root{
+    --grad1:#7c3aed;
+    --grad2:#ec4899;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    background:linear-gradient(135deg,#ede9fe,#fce7f3);
+    padding:20px;
+  }
+  .card{
+    background:#fff;
+    border-radius:24px;
+    padding:32px 24px 24px;
+    max-width:420px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(124,58,237,0.15);
+  }
+  .badge{
+    display:inline-block;
+    background:#ede9fe;
+    color:#7c3aed;
+    font-weight:600;
+    font-size:0.85rem;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  h1{
+    font-size:1.9rem;
+    margin:0 0 6px;
+  }
+  h1 .grad{
+    background:linear-gradient(135deg,var(--grad1),var(--grad2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .subtitle{
+    color:#6b7280;
+    margin-bottom:20px;
+    font-size:0.95rem;
+  }
+  #puzzle{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
+    gap:6px;
+    width:100%;
+    max-width:340px;
+    aspect-ratio:1/1;
+    margin:0 auto;
+    border-radius:16px;
+    overflow:hidden;
+    background:#ddd;
+  }
+  .tile{
+    background-size:300% 300%;
+    border-radius:8px;
+    cursor:pointer;
+    transition:transform 0.15s ease;
+    border:2px solid transparent;
+  }
+  .tile.selected{
+    border-color:var(--grad1);
+    transform:scale(0.95);
+  }
+  .hint{
+    margin-top:14px;
+    color:#9ca3af;
+    font-size:0.85rem;
+  }
+  footer{
+    margin-top:24px;
+    font-size:0.78rem;
+    color:#9ca3af;
+  }
+  footer a{ color:#7c3aed; text-decoration:none; }
+
+  /* Reveal screen */
+  #reveal{
+    display:none;
+  }
+  #reveal.show{ display:block; }
+  #puzzleScreen.hide{ display:none; }
+
+  .hearts{ font-size:2rem; margin-bottom:6px;}
+  .message-box{
+    background:#faf5ff;
+    border-radius:16px;
+    padding:18px;
+    margin:18px 0;
+    font-style:italic;
+    color:#374151;
+    line-height:1.5;
+  }
+  .reveal-photo{
+    width:100%;
+    border-radius:16px;
+    margin-top:6px;
+  }
+
+  .next-btn{
+    margin-top:20px;
+    border:none;
+    background:linear-gradient(135deg,var(--grad1),var(--grad2));
+    color:#fff;
+    font-weight:600;
+    font-size:1rem;
+    padding:12px 28px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+
+  /* Question screen */
+  #question{ display:none; }
+  #question.show{ display:block; }
+
+  .question-box{
+    background:#faf5ff;
+    border-radius:16px;
+    padding:24px 20px;
+    margin:18px 0;
+  }
+  .question-text{
+    font-weight:700;
+    font-size:1.2rem;
+    margin-bottom:18px;
+    color:#1f2937;
+  }
+  .btn-track{
+    position:relative;
+    height:54px;
+    background:#fde2e9;
+    border-radius:999px;
+  }
+  #yesBtn{
+    position:absolute;
+    top:0; left:0;
+    height:54px;
+    min-width:54px;
+    background:linear-gradient(135deg,#ec4899,#f43f5e);
+    color:#fff;
+    font-weight:700;
+    font-size:1.05rem;
+    border:none;
+    border-radius:999px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:width 0.25s ease;
+    width:100%;
+    z-index:1;
+  }
+  #noBtn{
+    position:absolute;
+    top:6px;
+    height:42px;
+    padding:0 18px;
+    background:#fff;
+    border:1px solid #f3d4de;
+    color:#374151;
+    font-weight:600;
+    border-radius:999px;
+    cursor:pointer;
+    z-index:2;
+    transition:left 0.18s ease, top 0.18s ease;
+  }
+  .question-hint{
+    margin-top:14px;
+    color:#ec4899;
+    font-style:italic;
+    font-size:0.9rem;
+  }
+
+  /* Final celebration screen */
+  #celebrate{ display:none; }
+  #celebrate.show{ display:block; }
+  .celebrate-gif{
+    width:100%;
+    border-radius:16px;
+    margin:10px 0 18px;
+  }
+  .action-btn{
+    display:block;
+    width:100%;
+    padding:13px;
+    border-radius:999px;
+    font-weight:600;
+    font-size:1rem;
+    margin-bottom:12px;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .btn-outline{
+    background:#fff;
+    border:1.5px solid var(--grad1);
+    color:var(--grad1);
+  }
+  .btn-filled{
+    background:linear-gradient(135deg,var(--grad1),var(--grad2));
+    border:none;
+    color:#fff;
+  }
+
+  /* simple confetti */
+  .confetti{
+    position:fixed;
+    top:-10px;
+    width:8px;
+    height:14px;
+    opacity:0.9;
+    z-index:999;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform:translateY(110vh) rotate(360deg); opacity:0.3; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="puzzleScreen">
+  <span class="badge" id="puzzleTitle">Laddus Love Puzzle</span>
+  <h1><span class="grad">Solve</span> with Love 💜</h1>
+  <p class="subtitle">Tap & drag to swap tiles</p>
+
+  <div id="puzzle"></div>
+
+  <p class="hint">Drag tiles to swap, or tap to select 💕</p>
+
+  <footer>For any issues or feedback, reach out to <a href="mailto:teja.addaakula@gmail.com">teja.addaakula@gmail.com</a></footer>
+</div>
+
+<div class="card" id="reveal">
+  <div class="hearts">💖 ✨ 💜</div>
+  <h1><span class="grad">A Special</span><br>Message For You</h1>
+
+  <div class="message-box" id="messageText">
+    Your message goes here. Edit this in the CONFIG section of index.html.
+  </div>
+
+  <img class="reveal-photo" id="revealPhoto" src="" alt="">
+
+  <button class="next-btn" id="toQuestionBtn">One more thing →</button>
+
+  <footer>For any issues or feedback, reach out to <a href="mailto:teja.addaakula@gmail.com">teja.addaakula@gmail.com</a></footer>
+</div>
+
+<div class="card" id="question">
+  <h1><span class="grad">A Question</span> for You ❤️</h1>
+  <p class="subtitle">from someone special</p>
+
+  <div class="question-box">
+    <div class="question-text" id="questionText">Will you forever be mine?</div>
+    <div class="btn-track" id="btnTrack">
+      <button id="yesBtn">Yes 💖</button>
+      <button id="noBtn">No 🙈</button>
+    </div>
+  </div>
+
+  <p class="question-hint" id="questionHint">You can't escape love! 💘</p>
+
+  <footer>For any issues or feedback, reach out to <a href="mailto:youremail@example.com">youremail@example.com</a></footer>
+</div>
+
+<div class="card" id="celebrate">
+  <div class="hearts">💖 🥰 💖</div>
+  <h1><span class="grad" id="celebrateTitleEl">It's a date</span> then!</h1>
+  <p class="subtitle" id="celebrateSubtitleEl">Knew you'd say yes 😏</p>
+
+  <img class="celebrate-gif" id="celebrateGif" src="" alt="">
+
+  <button class="action-btn btn-outline" id="playAgainBtn">🔄 Play Again</button>
+  <a class="action-btn btn-filled" id="makeOwnBtn" href="#">Make Your Own Link</a>
+
+  <footer>For any issues or feedback, reach out to <a href="mailto:teja.addaakula@gmail.com">teja.addaakula@gmail.com</a></footer>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — edit everything here, no other code changes needed
+   ============================================================ */
+const CONFIG = {
+  recipientName: "Bithika",                 // shows as "Bithika's Puzzle"
+  // Full image used to build the 3x3 puzzle (square image works best)
+  puzzleImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80",
+  // Personal message revealed after solving
+  message: "You make my heart smile in ways I never knew were possible. Here's to us and all the adventures ahead.",
+  // Photo shown under the message after solving
+  revealImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80",
+  gridSize: 3, // 3 = 3x3 puzzle (9 tiles)
+
+  // --- "Question" screen ---
+  question: "Will you forever be mine?",
+  questionHint: "You can't escape love! 💘",
+  yesText: "Yes 💖",
+  noText: "No 🙈",
+
+  // --- Final celebration screen ---
+  celebrateTitle: "It's a date then!",
+  celebrateSubtitle: "Knew you'd say yes 😏",
+  celebrateGif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif",
+  makeOwnLinkUrl: "https://github.com/YOUR_USERNAME/YOUR_REPO" // where "Make Your Own Link" points
+};
+
+/* ============================================================ */
+
+document.getElementById('puzzleTitle').textContent = CONFIG.recipientName + "'s Puzzle";
+document.getElementById('messageText').textContent = CONFIG.message;
+document.getElementById('revealPhoto').src = CONFIG.revealImage;
+document.getElementById('questionText').textContent = CONFIG.question;
+document.getElementById('questionHint').textContent = CONFIG.questionHint;
+document.getElementById('yesBtn').textContent = CONFIG.yesText;
+document.getElementById('noBtn').textContent = CONFIG.noText;
+document.getElementById('celebrateTitleEl').textContent = CONFIG.celebrateTitle;
+document.getElementById('celebrateSubtitleEl').textContent = CONFIG.celebrateSubtitle;
+document.getElementById('celebrateGif').src = CONFIG.celebrateGif;
+document.getElementById('makeOwnBtn').href = CONFIG.makeOwnLinkUrl;
+
+const puzzleEl = document.getElementById('puzzle');
+const n = CONFIG.gridSize;
+const totalTiles = n * n;
+
+// order[i] = which original tile position is currently shown at slot i
+let order = [...Array(totalTiles).keys()];
+
+function shuffle(arr){
+  // Fisher-Yates, but avoid leaving it already solved
+  do{
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+  } while(isSolved(arr));
+  return arr;
+}
+
+function isSolved(arr){
+  return arr.every((v,i)=>v===i);
+}
+
+let selectedIndex = null;
+let dragSrcIndex = null;
+
+function render(){
+  puzzleEl.innerHTML = '';
+  order.forEach((tileOriginalPos, slotIndex)=>{
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.draggable = true;
+    tile.dataset.slot = slotIndex;
+
+    const row = Math.floor(tileOriginalPos / n);
+    const col = tileOriginalPos % n;
+    const posX = (col / (n-1)) * 100;
+    const posY = (row / (n-1)) * 100;
+
+    tile.style.backgroundImage = `url(${CONFIG.puzzleImage})`;
+    tile.style.backgroundPosition = `${posX}% ${posY}%`;
+
+    tile.addEventListener('click', ()=>handleTap(slotIndex, tile));
+    tile.addEventListener('dragstart', ()=>{ dragSrcIndex = slotIndex; });
+    tile.addEventListener('dragover', (e)=>e.preventDefault());
+    tile.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      if(dragSrcIndex !== null) swap(dragSrcIndex, slotIndex);
+      dragSrcIndex = null;
+    });
+
+    puzzleEl.appendChild(tile);
+  });
+}
+
+function handleTap(slotIndex, tileEl){
+  if(selectedIndex === null){
+    selectedIndex = slotIndex;
+    tileEl.classList.add('selected');
+  } else {
+    swap(selectedIndex, slotIndex);
+    document.querySelectorAll('.tile').forEach(t=>t.classList.remove('selected'));
+    selectedIndex = null;
+  }
+}
+
+function swap(i, j){
+  [order[i], order[j]] = [order[j], order[i]];
+  render();
+  if(isSolved(order)){
+    setTimeout(onSolved, 250);
+  }
+}
+
+function onSolved(){
+  document.getElementById('puzzleScreen').classList.add('hide');
+  document.getElementById('reveal').classList.add('show');
+  launchConfetti();
+}
+
+function launchConfetti(){
+  const colors = ['#7c3aed','#ec4899','#f472b6','#a78bfa','#fbcfe8'];
+  for(let i=0;i<60;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDuration = (2 + Math.random()*2) + 's';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 4500);
+  }
+}
+
+order = shuffle(order);
+render();
+
+/* ---------- Screen navigation ---------- */
+document.getElementById('toQuestionBtn').addEventListener('click', ()=>{
+  document.getElementById('reveal').classList.remove('show');
+  document.getElementById('question').classList.add('show');
+});
+
+document.getElementById('playAgainBtn').addEventListener('click', ()=>{
+  location.reload();
+});
+
+/* ---------- "No" button dodges, "Yes" button grows ---------- */
+const track = document.getElementById('btnTrack');
+const yesBtn = document.getElementById('yesBtn');
+const noBtn = document.getElementById('noBtn');
+let dodgeCount = 0;
+
+function placeNoBtnInitial(){
+  // sit "No" near the right edge inside the track on first render
+  const trackRect = track.getBoundingClientRect();
+  noBtn.style.left = (trackRect.width - noBtn.offsetWidth - 6) + 'px';
+  noBtn.style.top = '6px';
+}
+
+function dodge(){
+  dodgeCount++;
+  const trackRect = track.getBoundingClientRect();
+  const maxLeft = Math.max(trackRect.width - noBtn.offsetWidth - 6, 6);
+  const maxTop = Math.max(track.offsetHeight - noBtn.offsetHeight - 6, 6);
+  const newLeft = Math.random() * maxLeft;
+  const newTop = Math.random() * maxTop;
+  noBtn.style.left = newLeft + 'px';
+  noBtn.style.top = newTop + 'px';
+
+  // Yes button grows a little each time, eating space
+  const growth = Math.min(10 + dodgeCount * 6, 70);
+  yesBtn.style.width = `calc(100% - ${Math.max(54 - growth, 0)}px)`;
+}
+
+// Trigger dodge on hover (desktop) and on touchstart (mobile), before a click can land
+noBtn.addEventListener('mouseenter', dodge);
+noBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); dodge(); }, {passive:false});
+noBtn.addEventListener('click', (e)=>{ e.preventDefault(); dodge(); });
+
+yesBtn.addEventListener('click', ()=>{
+  document.getElementById('question').classList.remove('show');
+  document.getElementById('celebrate').classList.add('show');
+  launchConfetti();
+});
+
+window.addEventListener('load', placeNoBtnInitial);
+setTimeout(placeNoBtnInitial, 50);
+</script>
+</body>
+</html>
