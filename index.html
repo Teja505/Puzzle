@@ -235,7 +235,7 @@
 <body>
 
 <div class="card" id="puzzleScreen">
-  <span class="badge" id="puzzleTitle">Laddus Love Puzzle</span>
+  <span class="badge" id="puzzleTitle">Laddu's Love Puzzle</span>
   <h1><span class="grad">Solve</span> with Love 💜</h1>
   <p class="subtitle">Tap & drag to swap tiles</p>
 
@@ -243,7 +243,7 @@
 
   <p class="hint">Drag tiles to swap, or tap to select 💕</p>
 
-  <footer>For any issues or feedback, reach out to <a href="mailto:teja.addaakula@gmail.com">teja.addaakula@gmail.com</a></footer>
+  <footer>For any issues or feedback, reach out to <a href="mailto:mailto:addaakula.teja@gmail.com">mailto:addaakula.teja@gmail.com</a></footer>
 </div>
 
 <div class="card" id="reveal">
@@ -258,7 +258,7 @@
 
   <button class="next-btn" id="toQuestionBtn">One more thing →</button>
 
-  <footer>For any issues or feedback, reach out to <a href="mailto:teja.addaakula@gmail.com">teja.addaakula@gmail.com</a></footer>
+  <footer>For any issues or feedback, reach out to <a href="mailto:addaakula.teja@gmail.com">mailto:addaakula.teja@gmail.com</a></footer>
 </div>
 
 <div class="card" id="question">
@@ -275,7 +275,7 @@
 
   <p class="question-hint" id="questionHint">You can't escape love! 💘</p>
 
-  <footer>For any issues or feedback, reach out to <a href="mailto:youremail@example.com">youremail@example.com</a></footer>
+  <footer>For any issues or feedback, reach out to <a href="mailto:mailto:addaakula.teja@gmail.com">mailto:addaakula.teja@gmail.com</a></footer>
 </div>
 
 <div class="card" id="celebrate">
@@ -286,9 +286,9 @@
   <img class="celebrate-gif" id="celebrateGif" src="" alt="">
 
   <button class="action-btn btn-outline" id="playAgainBtn">🔄 Play Again</button>
-  <a class="action-btn btn-filled" id="makeOwnBtn" href="#">Make Your Own Link</a>
+  <a class="action-btn btn-filled" id="instagramBtn" href="#" target="_blank" rel="noopener">📸 Follow me on Instagram</a>
 
-  <footer>For any issues or feedback, reach out to <a href="mailto:teja.addaakula@gmail.com">teja.addaakula@gmail.com</a></footer>
+  <footer>For any issues or feedback, reach out to <a href="mailto:mailto:addaakula.teja@gmail.com">mailto:addaakula.teja@gmail.com</a></footer>
 </div>
 
 <script>
@@ -296,13 +296,13 @@
    CONFIG — edit everything here, no other code changes needed
    ============================================================ */
 const CONFIG = {
-  recipientName: "Bithika",                 // shows as "Bithika's Puzzle"
+  recipientName: "Laddu",                 // shows as "Laddu's Puzzle"
   // Full image used to build the 3x3 puzzle (square image works best)
-  puzzleImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80",
+  puzzleImage: "images/1.jpg",
   // Personal message revealed after solving
   message: "You make my heart smile in ways I never knew were possible. Here's to us and all the adventures ahead.",
   // Photo shown under the message after solving
-  revealImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80",
+  revealImage: "images/2.jpg",
   gridSize: 3, // 3 = 3x3 puzzle (9 tiles)
 
   // --- "Question" screen ---
@@ -314,13 +314,13 @@ const CONFIG = {
   // --- Final celebration screen ---
   celebrateTitle: "It's a date then!",
   celebrateSubtitle: "Knew you'd say yes 😏",
-  celebrateGif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif",
-  makeOwnLinkUrl: "https://github.com/YOUR_USERNAME/YOUR_REPO" // where "Make Your Own Link" points
+  celebrateGif: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMWFxc24yamx5anFvZ2xxcXJnYmdhZnA1ODI3NnJ2ZnE4bXZkY3ZjcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/eSUNxzWS0fI9dnqoCv/giphy.gif",
+  instagramUrl: "https://www.instagram.com/_tejakumar" // "Follow me on Instagram" button points here
 };
 
 /* ============================================================ */
 
-document.getElementById('puzzleTitle').textContent = CONFIG.recipientName + "'s Puzzle";
+document.getElementById('puzzleTitle').textContent = CONFIG.recipientName + "'s Love Puzzle";
 document.getElementById('messageText').textContent = CONFIG.message;
 document.getElementById('revealPhoto').src = CONFIG.revealImage;
 document.getElementById('questionText').textContent = CONFIG.question;
@@ -330,7 +330,7 @@ document.getElementById('noBtn').textContent = CONFIG.noText;
 document.getElementById('celebrateTitleEl').textContent = CONFIG.celebrateTitle;
 document.getElementById('celebrateSubtitleEl').textContent = CONFIG.celebrateSubtitle;
 document.getElementById('celebrateGif').src = CONFIG.celebrateGif;
-document.getElementById('makeOwnBtn').href = CONFIG.makeOwnLinkUrl;
+document.getElementById('instagramBtn').href = CONFIG.instagramUrl;
 
 const puzzleEl = document.getElementById('puzzle');
 const n = CONFIG.gridSize;
@@ -355,15 +355,18 @@ function isSolved(arr){
 }
 
 let selectedIndex = null;
-let dragSrcIndex = null;
+let dragSource = null;
+let dragStartPos = null;
+let isDragging = false;
+const DRAG_THRESHOLD = 10; // px of movement before we treat it as a drag, not a tap
 
 function render(){
   puzzleEl.innerHTML = '';
   order.forEach((tileOriginalPos, slotIndex)=>{
     const tile = document.createElement('div');
     tile.className = 'tile';
-    tile.draggable = true;
     tile.dataset.slot = slotIndex;
+    if(selectedIndex === slotIndex) tile.classList.add('selected');
 
     const row = Math.floor(tileOriginalPos / n);
     const col = tileOriginalPos % n;
@@ -372,29 +375,72 @@ function render(){
 
     tile.style.backgroundImage = `url(${CONFIG.puzzleImage})`;
     tile.style.backgroundPosition = `${posX}% ${posY}%`;
+    tile.style.userSelect = 'none';
+    tile.style.touchAction = 'none';
 
-    tile.addEventListener('click', ()=>handleTap(slotIndex, tile));
-    tile.addEventListener('dragstart', ()=>{ dragSrcIndex = slotIndex; });
-    tile.addEventListener('dragover', (e)=>e.preventDefault());
-    tile.addEventListener('drop', (e)=>{
-      e.preventDefault();
-      if(dragSrcIndex !== null) swap(dragSrcIndex, slotIndex);
-      dragSrcIndex = null;
-    });
+    tile.addEventListener('mousedown', (e)=>startInteraction(slotIndex, e.clientX, e.clientY));
+    tile.addEventListener('touchstart', (e)=>{
+      const t = e.touches[0];
+      startInteraction(slotIndex, t.clientX, t.clientY);
+    }, {passive:true});
 
     puzzleEl.appendChild(tile);
   });
 }
 
-function handleTap(slotIndex, tileEl){
+function startInteraction(slotIndex, x, y){
+  dragSource = slotIndex;
+  dragStartPos = {x, y};
+  isDragging = false;
+}
+
+function updateInteraction(x, y){
+  if(dragSource === null) return;
+  const dx = x - dragStartPos.x;
+  const dy = y - dragStartPos.y;
+  if(Math.hypot(dx, dy) > DRAG_THRESHOLD) isDragging = true;
+}
+
+function endInteraction(x, y){
+  if(dragSource === null) return;
+  const fromIndex = dragSource;
+  dragSource = null;
+
+  if(isDragging){
+    const target = document.elementFromPoint(x, y);
+    const dropTile = target && target.closest ? target.closest('.tile') : null;
+    if(dropTile && dropTile.dataset.slot !== undefined){
+      const toIndex = parseInt(dropTile.dataset.slot, 10);
+      if(toIndex !== fromIndex) swap(fromIndex, toIndex);
+    }
+  } else {
+    handleTap(fromIndex);
+  }
+  isDragging = false;
+}
+
+document.addEventListener('mousemove', (e)=>updateInteraction(e.clientX, e.clientY));
+document.addEventListener('mouseup', (e)=>endInteraction(e.clientX, e.clientY));
+document.addEventListener('touchmove', (e)=>{
+  if(dragSource !== null && e.touches[0]) updateInteraction(e.touches[0].clientX, e.touches[0].clientY);
+}, {passive:true});
+document.addEventListener('touchend', (e)=>{
+  const t = e.changedTouches[0];
+  if(t) endInteraction(t.clientX, t.clientY);
+});
+
+function handleTap(slotIndex){
   if(selectedIndex === null){
     selectedIndex = slotIndex;
-    tileEl.classList.add('selected');
   } else {
-    swap(selectedIndex, slotIndex);
-    document.querySelectorAll('.tile').forEach(t=>t.classList.remove('selected'));
+    const prev = selectedIndex;
     selectedIndex = null;
+    if(prev !== slotIndex){
+      swap(prev, slotIndex);
+      return; // swap() already calls render()
+    }
   }
+  render();
 }
 
 function swap(i, j){
